@@ -1,22 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks'
 import { messagesQuery, addMessageMutation, messageAddedSubscription } from './graphql/queries';
 import MessageInput from './MessageInput';
 import MessageList from './MessageList';
 
-const Chat = ({user}) => {
-  
-  const [messages, setMessages] = useState([])
-  // const {data, error, loading} = useQuery(messagesQuery);
-  useQuery(messagesQuery, {
-    onCompleted: (data)=> setMessages(data.messages)
-  });
+const useChatMessages = () => {
+
+  const {data} = useQuery(messagesQuery);
+  const messages = data ? data.messages : []
   useSubscription(messageAddedSubscription, {
-    onSubscriptionData: ({subscriptionData})=> (
-      setMessages([...messages, subscriptionData.data.messageAdded])
+  onSubscriptionData: ({client, subscriptionData})=> (
+      client.writeData({data: {
+        messages: [...messages, subscriptionData.data.messageAdded]
+      }})
       )
   });
   const [addMessage] = useMutation(addMessageMutation);
+  
+  return { messages, addMessage}
+
+}
+
+const Chat = ({user}) => {
+
+  const {addMessage, messages} = useChatMessages();
   
   const handleSend = async (text) => {
     await addMessage({variables: {input: {text}}})
