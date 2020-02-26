@@ -4,6 +4,10 @@ import { messagesQuery, addMessageMutation, messageAddedSubscription } from './g
 import MessageInput from './MessageInput';
 import MessageList from './MessageList';
 
+//function should be moved somewhere else, 
+//but is kept here for contextualizing the hook within the chat component
+//in actual production code would be added to and imported from a separate hooks.js file
+
 const useChatMessages = () => {
 
   const {data} = useQuery(messagesQuery);
@@ -17,7 +21,11 @@ const useChatMessages = () => {
   });
   const [addMessage] = useMutation(addMessageMutation);
   
-  return { messages, addMessage}
+  //in js you can modify an existing function in the way seen below to simplify things
+  return { 
+    messages, 
+    addMessage: (text)=>addMessage({variables: {input: {text}}})
+  }
 
 }
 
@@ -26,7 +34,7 @@ const Chat = ({user}) => {
   const {addMessage, messages} = useChatMessages();
   
   const handleSend = async (text) => {
-    await addMessage({variables: {input: {text}}})
+    await addMessage(text)
   }
 
   return (
@@ -34,7 +42,7 @@ const Chat = ({user}) => {
       <div className="container">
         <h1 className="title">Chatting as {user}</h1>
         <MessageList user={user} messages={messages} />
-        <MessageInput onSend={handleSend} />
+        <MessageInput onSend={addMessage} />
       </div>
     </section>
   );
