@@ -21,6 +21,16 @@ const addMessageMutation = gql`
   }
 `;
 
+const messageAddedSubscription = gql`
+  subscription{
+    messageAdded{
+      id
+      from
+      text
+    }
+  }
+`;
+
 export async function addMessage(text) {
   const {data} = await client.mutate({
     mutation: addMessageMutation,
@@ -32,4 +42,9 @@ export async function addMessage(text) {
 export async function getMessages() {
   const {data} = await client.query({query: messagesQuery});
   return data.messages;
+}
+
+export const onMessageAdded = async(handleMessage) => {
+  const observable = client.subscribe({query: messageAddedSubscription});
+  return observable.subscribe(({data})=> handleMessage(data.messageAdded))
 }
