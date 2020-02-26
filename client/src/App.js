@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { ApolloProvider } from '@apollo/react-hooks'
 import { getLoggedInUser, logout } from './auth';
 import Chat from './Chat';
 import Login from './Login';
@@ -22,10 +23,12 @@ class App extends Component {
       return <Login onLogin={this.handleLogin.bind(this)} />;
     }
     return (
-      <div>
-        <NavBar onLogout={this.handleLogout.bind(this)} />
-        <Chat user={user} />
-      </div>
+      <ApolloProvider>
+        <div>
+          <NavBar onLogout={this.handleLogout.bind(this)} />
+          <Chat user={user} />
+        </div>
+      </ApolloProvider>
     );  
   }
 }

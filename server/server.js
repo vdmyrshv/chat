@@ -21,9 +21,15 @@ app.use(cors(), bodyParser.json(), expressJwt({
 const typeDefs = fs.readFileSync('./schema.graphql', {encoding: 'utf8'});
 const resolvers = require('./resolvers');
 
-function context({req}) {
+//req destructuring is for http connection, connection destructuring is for ws connection
+function context({req, connection}) {
   if (req && req.user) {
     return {userId: req.user.sub};
+  }
+  if (connection && connection.context && connection.context.accessToken) {
+    const decodedToken = jwt.verify(connection.context.accessToken, jwtSecret)
+    console.log(decodedToken)
+    return {userId: decodedToken.sub};
   }
   return {};
 }
